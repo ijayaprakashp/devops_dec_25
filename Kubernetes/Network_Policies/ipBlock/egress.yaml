@@ -1,0 +1,19 @@
+
+#This policy allows pods (with label app: my-app) to send traffic only to IP addresses in the 10.0.0.0/16 range.
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restrict-egress-to-ip
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: my-app
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/16
+

@@ -1,0 +1,27 @@
+# Block privileged containers — a privileged container can escape to the host.
+# This is a Pod Security "baseline/restricted" style control enforced by Kyverno.
+#
+# We use `=(securityContext)` and `=(privileged)` EXISTENCE anchors so the rule
+# reads as: "IF securityContext.privileged is set, it must NOT be true."
+# An absent securityContext is fine (privileged defaults to false).
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged-containers
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: no-privileged
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Privileged containers are not allowed."
+        pattern:
+          spec:
+            containers:
+              - =(securityContext):
+                  =(privileged): "false"

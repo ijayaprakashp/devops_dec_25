@@ -1,0 +1,32 @@
+# Require CPU & memory requests AND limits on every container.
+# Why: without requests the scheduler can't bin-pack and pods get evicted under
+# pressure; without limits a noisy neighbour can starve the node.
+#
+# The `=(...)` is an EXISTENCE anchor: "if this path exists, it must match".
+# Here we want them MANDATORY, so we assert the values must be non-empty ("?*").
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-requests-limits
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: validate-resources
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "CPU and memory requests and limits are required on every container."
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    memory: "?*"
+                    cpu: "?*"
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"

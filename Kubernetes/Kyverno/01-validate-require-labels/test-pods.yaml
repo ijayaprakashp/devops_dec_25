@@ -1,0 +1,24 @@
+# good: has the team label  -> ALLOWED
+# bad : no team label        -> REJECTED by Kyverno
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: good-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bad-pod
+  namespace: kyverno-demo
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine

@@ -1,0 +1,39 @@
+# Disallow the `:latest` image tag (and untagged images, which default to latest).
+# Why it matters: `:latest` is mutable -> non-reproducible deploys, broken rollbacks,
+# and a supply-chain risk. Pin to an immutable tag or a digest.
+#
+# Two checks, both must pass:
+#   1. image must HAVE a tag           -> pattern "*:*"
+#   2. tag must NOT be `latest`        -> pattern "!*:latest"  ( ! = negation )
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-image-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "An image tag is required (untagged images default to :latest)."
+        pattern:
+          spec:
+            containers:
+              - image: "*:*"
+    - name: forbid-latest-tag
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Using the ':latest' tag is not allowed; pin an immutable tag or digest."
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"

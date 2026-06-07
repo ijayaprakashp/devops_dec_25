@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: liveness-readiness
+spec:
+    type: ClusterIP
+    selector:
+       app: liveness-readiness-demo
+    ports:
+     - name: http
+       port: 8090
+       targetPort: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liveness-readiness-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: liveness-readiness-demo
+  template:
+    metadata:
+      labels:
+        app: liveness-readiness-demo
+    spec:
+      containers:
+      - name: liveness-readiness-demo-container
+        image: harshajain/probes:httpget
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 5  # Wait for 5 seconds before the first check
+          periodSeconds: 5        # Probe every 5 seconds
+          timeoutSeconds: 2       # Timeout for each probe after 2 seconds
+          failureThreshold: 3     # Mark as not ready after 3 failed probes
+

@@ -1,0 +1,28 @@
+# Require every Pod to carry a `team` label.
+# validate + Enforce => the admission webhook REJECTS non-compliant Pods at create time.
+#
+# - ClusterPolicy: cluster-scoped, applies across all namespaces (a namespaced
+#   `Policy` would scope it to one namespace).
+# - validationFailureAction: Enforce  => block. Use `Audit` to only report.
+# - pattern: declarative "the resource must look like this". `team: "?*"` means
+#   the label must exist and be non-empty (? = one char, * = zero or more).
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-team-label
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: check-team-label
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Every Pod must have a 'team' label."
+        pattern:
+          metadata:
+            labels:
+              team: "?*"

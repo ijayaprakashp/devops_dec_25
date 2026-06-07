@@ -1,0 +1,28 @@
+# good: not privileged       -> ALLOWED
+# bad : privileged: true     -> REJECTED
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: normal-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+      securityContext:
+        privileged: true

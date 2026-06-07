@@ -1,0 +1,33 @@
+# good: requests + limits set  -> ALLOWED
+# bad : no resources block      -> REJECTED
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sized-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+      resources:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: unsized-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine

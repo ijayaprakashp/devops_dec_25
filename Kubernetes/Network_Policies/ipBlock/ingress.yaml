@@ -1,0 +1,23 @@
+
+#Below is an example of a NetworkPolicy that allows ingress traffic 
+#   from any IP in the 10.x.x.x range (i.e. 10.0.0.0/8)
+#   except for IP addresses in a specific CIDR (e.g., 10.1.2.0/24)
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-from-10-series-except
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: my-app
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+        except:
+          - 10.1.2.0/24
+

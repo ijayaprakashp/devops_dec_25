@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: readiness
+spec:
+    type: ClusterIP
+    selector:
+       app: readiness-demo
+    ports:
+     - name: http
+       port: 8080
+       targetPort: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: readiness-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: readiness-demo
+  template:
+    metadata:
+      labels:
+        app: readiness-demo
+    spec:
+      containers:
+      - name: readiness-demo-container
+        image: harshajain/probes:httpget
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5000
+          initialDelaySeconds: 5  # Wait for 5 seconds before the first check
+          periodSeconds: 5        # Probe every 5 seconds
+          timeoutSeconds: 2       # Timeout for each probe after 2 seconds
+          failureThreshold: 3     # Mark as not ready after 3 failed probes
+

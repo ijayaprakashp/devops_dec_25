@@ -1,0 +1,26 @@
+# good: pinned tag      -> ALLOWED
+# bad : :latest tag     -> REJECTED
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pinned-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: latest-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:latest

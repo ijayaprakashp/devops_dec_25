@@ -1,0 +1,30 @@
+# MUTATE: inject a hardening default into every Pod at admission time.
+# Here we add  spec.securityContext.seccompProfile.type: RuntimeDefault  if the
+# author didn't set it. This raises the security baseline without asking every
+# team to remember it.
+#
+# patchStrategicMerge with the `+(...)` ADD-IF-NOT-PRESENT anchor:
+#   - if the field is absent -> Kyverno adds it
+#   - if the author already set it -> Kyverno leaves their value untouched
+#
+# seccompProfile is safe to default (unlike runAsNonRoot, which can stop a pod
+# whose image runs as root from starting).
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-default-seccomp
+spec:
+  background: false   # mutate applies at admission; background scan can't mutate existing pods
+  rules:
+    - name: add-seccomp-runtimedefault
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      mutate:
+        patchStrategicMerge:
+          spec:
+            securityContext:
+              +(seccompProfile):
+                type: RuntimeDefault

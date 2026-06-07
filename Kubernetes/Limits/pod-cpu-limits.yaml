@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: pod-cpu-overload
+spec:
+    containers:
+    - name: cpu-overload
+      image: python:3.11-slim
+      command: ["python3","-c"]
+      args:
+      - |
+        import multiprocessing as mp
+        import os
+
+        def burn():
+            x = 0
+            while True:
+                x = x * x + 1  # tight loop, never yields
+
+        workers = os.cpu_count() or 1
+        print(f"spawning {workers} CPU burners", flush=True)
+        procs = [mp.Process(target=burn) for _ in range(workers)]
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join()
+      resources:
+        requests:
+          cpu: "1000m"
+        limits:
+          cpu: "1"

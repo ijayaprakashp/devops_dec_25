@@ -1,0 +1,14 @@
+# This pod sets NO seccompProfile. After Kyverno mutates it, the created pod
+# will have spec.securityContext.seccompProfile.type = RuntimeDefault.
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: plain-pod
+  namespace: kyverno-demo
+  labels:
+    team: payments
+spec:
+  containers:
+    - name: app
+      image: nginx:1.27-alpine

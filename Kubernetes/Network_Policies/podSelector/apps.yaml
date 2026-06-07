@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: np
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+  namespace: np
+  labels:
+    app: frontend
+spec:
+  containers:
+  - name: frontend
+    image: harshajain/alpine:latest
+    command: ['bash', '-c', 'sleep 3600']
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backend
+  namespace: np  
+  labels:
+    app: backend
+spec:
+  containers:
+  - name: backend
+    image: nginx:1.21
+    ports:
+    - containerPort: 80
+
+

@@ -1,0 +1,37 @@
+# GENERATE: when a new Namespace is created, automatically create a
+# default-deny-all NetworkPolicy inside it. This closes the classic gap where a
+# fresh namespace starts wide open until someone remembers to add policies.
+#
+# This ties directly back to ../networkpolicy/01-default-deny-ingress.
+#
+# Key fields:
+#   - match on Namespace create
+#   - generate.synchronize: true -> if the generated NetworkPolicy is deleted or
+#     drifts, Kyverno recreates/reconciles it (GitOps-style self-healing)
+#   - generate.namespace: "{{request.object.metadata.name}}" -> place the policy
+#     inside the namespace that was just created
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-default-deny-netpol
+spec:
+  rules:
+    - name: default-deny
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+      generate:
+        apiVersion: networking.k8s.io/v1
+        kind: NetworkPolicy
+        name: default-deny-all
+        namespace: "{{request.object.metadata.name}}"
+        synchronize: true
+        data:
+          spec:
+            # empty podSelector = all pods; both policyTypes with no rules = deny all
+            podSelector: {}
+            policyTypes:
+              - Ingress
+              - Egress

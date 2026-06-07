@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata: 
+    name: pod-oomkill
+spec: 
+    containers: 
+    - name: memory-overload 
+      image: python:3.11-slim
+      command: ["python3","-c"]
+      args:
+      - |
+        import time
+
+        CHUNK = 10 * 1024 * 1024  # 10 MB
+        held = []
+        total = 0
+        while True:
+            block = bytearray(CHUNK)
+            # touch every page so the kernel actually backs it with RAM
+            for i in range(0, CHUNK, 4096):
+                block[i] = 1
+            held.append(block)
+            total += CHUNK
+            print(f"allocated {total // (1024 * 1024)} MB", flush=True)
+            time.sleep(1)
+      resources:
+        requests:
+          memory: "100Mi"
+        limits:
+          memory: "100Mi"
+        

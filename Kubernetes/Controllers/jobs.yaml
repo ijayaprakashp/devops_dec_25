@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-job
+spec:
+  ttlSecondsAfterFinished: 60
+  template:
+    spec:
+      containers:
+      - name: busybox 
+        image: busybox:latest
+        command: ["sleep",  "10"]
+      restartPolicy: Never

@@ -1,0 +1,38 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: critical-platform
+value: 100000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "Infra components: Prometheus, Fluentd, Cert-manager. Preempts low/medium."
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high
+value: 10000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "Revenue-impacting services: payment, order, auth APIs."
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: medium
+value: 1000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: true          # untagged pods get this by default
+description: "Default for internal services and batch jobs."
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: low
+value: 100
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "Dev/test/non-critical background tasks. First to be evicted."
